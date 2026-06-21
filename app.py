@@ -205,8 +205,8 @@ def show_model_comparison(metrics, learning_curves):
         fig.suptitle('Validation Diagnostics: Tuned Learning Curves', fontsize=16, fontweight='bold')
         
         plot_configs = [
-            ('Random Forest', learning_curves['rf'], axes[0]),
-            ('XGBoost', learning_curves['xgboost'], axes[1])
+            ('XGBoost', learning_curves['xgboost'], axes[0]),
+            ('Random Forest', learning_curves['rf'], axes[1])
         ]
         
         for name, lc_data, ax in plot_configs:

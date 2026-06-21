@@ -70,8 +70,8 @@ def main():
     print("Membangun dan melatih model XGBoost...")
     xgb_clf = XGBClassifier(
         random_state=42, eval_metric='logloss',
-        reg_lambda=1, reg_alpha=0.1, max_depth=3, 
-        learning_rate=0.05, gamma=2
+        reg_lambda=0.5, reg_alpha=0.01, max_depth=6, 
+        learning_rate=0.1, gamma=0.1
     )
     xgb_pipeline = ImbPipeline([('prep', preprocessor), ('smote', smote), ('clf', xgb_clf)])
     xgb_pipeline.fit(X_train, y_train)
@@ -88,7 +88,7 @@ def main():
     # ========================== RANDOM FOREST ==========================
     print("Membangun dan melatih model Random Forest...")
     rf_clf = RandomForestClassifier(
-        n_estimators=200, max_depth=5, min_samples_split=50, min_samples_leaf=20,
+        n_estimators=200, max_depth=12, min_samples_split=2, 
         random_state=42, class_weight='balanced'
     )
     rf_pipeline = ImbPipeline([('prep', preprocessor), ('smote', smote), ('clf', rf_clf)])
