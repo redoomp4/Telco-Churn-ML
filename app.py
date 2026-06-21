@@ -198,38 +198,34 @@ def show_model_comparison(metrics, learning_curves):
             display_classification_metrics("Random Forest Classifier", metrics['rf_train'], metrics['rf_test'])
 
         st.markdown("<hr style='margin:30px 0;'>", unsafe_allow_html=True)
-        st.markdown("### Tuned Learning Curve Analysis", unsafe_allow_html=True)
+        import seaborn as sns
+        sns.set_theme(style="whitegrid")
         
-        col_lc1, col_lc2 = st.columns(2)
+        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+        fig.suptitle('Validation Diagnostics: Tuned Learning Curves', fontsize=16, fontweight='bold')
         
-        def plot_learning_curve(lc_data, title):
-            fig, ax = plt.subplots(figsize=(6, 4.5), dpi=150)
-            fig.patch.set_facecolor('#ffffff'); ax.set_facecolor('#ffffff')
-            for spine in ['top', 'right']: ax.spines[spine].set_visible(False)
-            ax.grid(True, linestyle='--', alpha=0.4, color='#cbd5e1')
-            
+        plot_configs = [
+            ('Random Forest', learning_curves['rf'], axes[0]),
+            ('XGBoost', learning_curves['xgboost'], axes[1])
+        ]
+        
+        for name, lc_data, ax in plot_configs:
             train_sizes = lc_data['train_sizes']
             train_mean = lc_data['train_scores_mean']
-            train_std = lc_data['train_scores_std']
-            test_mean = lc_data['test_scores_mean']
-            test_std = lc_data['test_scores_std']
+            val_mean = lc_data['test_scores_mean']
             
-            ax.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color="#f43f5e")
-            ax.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color="#10b981")
-            ax.plot(train_sizes, train_mean, 'o-', color="#f43f5e", label="Training score", linewidth=2)
-            ax.plot(train_sizes, test_mean, 'o-', color="#10b981", label="Cross-validation score", linewidth=2)
+            gap = train_mean[-1] - val_mean[-1]
+            status = "EXCELLENT" if gap < 0.03 else "GOOD FIT" if gap < 0.06 else "OVERFITTING"
             
-            ax.set_title(title, fontsize=11, fontweight='bold', color='#0f172a', pad=15)
-            ax.set_xlabel("Training Examples", fontsize=9, fontweight='bold')
-            ax.set_ylabel("F1 Score", fontsize=9, fontweight='bold')
-            ax.legend(loc="lower right", frameon=True, fontsize=8)
-            plt.tight_layout()
-            return fig
+            ax.plot(train_sizes, train_mean, 'o-', color="r", label="Training Score")
+            ax.plot(train_sizes, val_mean, 'o-', color="g", label="Validation Score")
+            ax.set_title(f"{name} ({status} | Gap: {gap:.4f})")
+            ax.set_xlabel("Training Set Size")
+            ax.set_ylabel("F1 Score")
+            ax.legend(loc='lower right')
             
-        with col_lc1:
-            st.pyplot(plot_learning_curve(learning_curves['xgboost'], "Learning Curve - XGBoost"))
-        with col_lc2:
-            st.pyplot(plot_learning_curve(learning_curves['rf'], "Learning Curve - Random Forest"))
+        plt.tight_layout()
+        st.pyplot(fig)
     else:
         st.warning("Metrik evaluasi atau data learning curve tidak ditemukan di file joblib.")
     st.markdown('</div>', unsafe_allow_html=True)
