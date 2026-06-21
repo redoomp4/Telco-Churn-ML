@@ -492,12 +492,16 @@ else:
                 st.dataframe(sampled_df, use_container_width=True)
                 
                 st.markdown("<hr style='margin: 40px 0;'>", unsafe_allow_html=True)
-                st.markdown("## Analitik Hasil Uji & Performa ML")
+                st.markdown("## Exploratory Data Analysis (EDA)")
                 
-                st.info("💡 **Konteks Analitik:** Grafik di bawah ini (EDA) secara dinamis dibuat **Berdasarkan Hasil Prediksi XGBoost** pada dataset yang baru saja Anda uji.")
-                # Munculkan EDA berdasarkan data yang sedang diuji
                 sampled_df['TotalCharges'] = pd.to_numeric(sampled_df['TotalCharges'], errors='coerce')
-                show_eda_dashboard(sampled_df, "Prediksi_XGBoost")
+                
+                if 'Churn' in sampled_df.columns:
+                    st.info("💡 **Konteks Analitik:** Grafik Exploratory Data Analysis (EDA) di bawah ini mengacu pada label **Aktual (Ground Truth)** dari dataset yang Anda unggah.")
+                    show_eda_dashboard(sampled_df, "Churn")
+                else:
+                    st.info("💡 **Konteks Analitik:** Karena dataset ini tidak memiliki kolom target 'Churn', Grafik (EDA) di bawah ini otomatis dibuat berdasarkan hasil **Prediksi XGBoost Classifier**.")
+                    show_eda_dashboard(sampled_df, "Prediksi_XGBoost")
                 
                 show_model_comparison(metrics, learning_curves)
 
