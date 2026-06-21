@@ -414,7 +414,14 @@ else:
             if os.path.exists("WA_Fn-UseC_-Telco-Customer-Churn.csv"):
                 st.info("ℹ️ Menggunakan dataset bawaan sistem.")
                 df_builtin = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
-                size_1 = st.number_input("Jumlah baris yang dianalisis:", min_value=5, max_value=len(df_builtin), value=min(len(df_builtin), 200), step=5, key="size_builtin")
+                
+                st.write("**Jumlah baris yang dianalisis:**")
+                col_s1, col_n1 = st.columns([3, 1])
+                with col_s1:
+                    size_1_slide = st.slider("Geser Slider", 5, len(df_builtin), min(len(df_builtin), 200), step=5, key="slide_builtin", label_visibility="collapsed")
+                with col_n1:
+                    size_1 = st.number_input("Tombol +/-", min_value=5, max_value=len(df_builtin), value=size_1_slide, step=5, key="num_builtin", label_visibility="collapsed")
+                
                 if st.button("Mulai Prediksi Massal", key="btn_builtin"):
                     test_df = df_builtin.head(size_1).copy()
                     
@@ -422,7 +429,14 @@ else:
             uploaded_file = st.file_uploader("Unggah file CSV Anda", type=["csv"], key="uploader_csv")
             if uploaded_file is not None:
                 df_upload = pd.read_csv(uploaded_file)
-                size_2 = st.number_input("Jumlah baris yang dianalisis:", min_value=5, max_value=len(df_upload), value=min(len(df_upload), 200), step=5, key="size_upload")
+                
+                st.write("**Jumlah baris yang dianalisis:**")
+                col_s2, col_n2 = st.columns([3, 1])
+                with col_s2:
+                    size_2_slide = st.slider("Geser Slider", 5, len(df_upload), min(len(df_upload), 200), step=5, key="slide_upload", label_visibility="collapsed")
+                with col_n2:
+                    size_2 = st.number_input("Tombol +/-", min_value=5, max_value=len(df_upload), value=size_2_slide, step=5, key="num_upload", label_visibility="collapsed")
+                
                 if st.button("Mulai Prediksi Massal", key="btn_upload"):
                     test_df = df_upload.head(size_2).copy()
                     
