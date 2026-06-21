@@ -40,12 +40,7 @@ st.markdown("""
         color: #0f172a !important; font-weight: 800 !important; letter-spacing: -0.5px;
     }
     
-    input {
-        background-color: #ffffff !important; color: #0f172a !important;
-        border: 2px solid #cbd5e1 !important; border-radius: 10px !important;
-        padding: 10px !important; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-    }
-    div[data-baseweb="select"] span { font-weight: 600 !important; }
+
     
     .header-container {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
