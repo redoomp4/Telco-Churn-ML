@@ -414,7 +414,7 @@ else:
             if os.path.exists("WA_Fn-UseC_-Telco-Customer-Churn.csv"):
                 st.info("ℹ️ Menggunakan dataset bawaan sistem.")
                 df_builtin = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
-                size_1 = st.slider("Jumlah baris yang dianalisis:", 5, len(df_builtin), min(len(df_builtin), 200), step=5, key="size_builtin")
+                size_1 = st.number_input("Jumlah baris yang dianalisis:", min_value=5, max_value=len(df_builtin), value=min(len(df_builtin), 200), step=5, key="size_builtin")
                 if st.button("Mulai Prediksi Massal", key="btn_builtin"):
                     test_df = df_builtin.head(size_1).copy()
                     
@@ -422,7 +422,7 @@ else:
             uploaded_file = st.file_uploader("Unggah file CSV Anda", type=["csv"], key="uploader_csv")
             if uploaded_file is not None:
                 df_upload = pd.read_csv(uploaded_file)
-                size_2 = st.slider("Jumlah baris yang dianalisis:", 5, len(df_upload), min(len(df_upload), 200), step=5, key="size_upload")
+                size_2 = st.number_input("Jumlah baris yang dianalisis:", min_value=5, max_value=len(df_upload), value=min(len(df_upload), 200), step=5, key="size_upload")
                 if st.button("Mulai Prediksi Massal", key="btn_upload"):
                     test_df = df_upload.head(size_2).copy()
                     
