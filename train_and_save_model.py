@@ -10,13 +10,12 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
 import joblib
 
-from sklearn.model_selection import train_test_split, learning_curve, StratifiedKFold
+from sklearn.model_selection import train_test_split, learning_curve
 
 def get_learning_curve_data(estimator, X, y):
-    cv_strategy = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     # Calculates learning curve data points based on F1 Score
     train_sizes, train_scores, test_scores = learning_curve(
-        estimator, X, y, cv=cv_strategy, n_jobs=-1, 
+        estimator, X, y, cv=5, n_jobs=-1, 
         train_sizes=np.linspace(0.1, 1.0, 5),
         scoring='f1'
     )
@@ -68,8 +67,6 @@ def main():
 
     from sklearn.model_selection import RandomizedSearchCV
 
-    cv_strategy = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-
     # ========================== XGBOOST ==========================
     print("Membangun dan melakukan Tuning model XGBoost...")
     xgb_base = XGBClassifier(random_state=42, eval_metric='logloss')
@@ -81,7 +78,7 @@ def main():
         'clf__reg_lambda': [0.1, 0.5, 1, 5],
         'clf__gamma': [0.1, 0.5, 1, 2]
     }
-    xgb_search = RandomizedSearchCV(xgb_pipe_base, xgb_params, n_iter=5, cv=cv_strategy, scoring='f1', n_jobs=-1, random_state=42)
+    xgb_search = RandomizedSearchCV(xgb_pipe_base, xgb_params, n_iter=5, cv=5, scoring='f1', n_jobs=-1, random_state=42)
     xgb_search.fit(X_train, y_train)
     xgb_pipeline = xgb_search.best_estimator_
     print(f"Parameter terbaik XGBoost: {xgb_search.best_params_}")
@@ -105,7 +102,7 @@ def main():
         'clf__min_samples_leaf': [2, 20, 50],
         'clf__min_samples_split': [2, 50, 100]
     }
-    rf_search = RandomizedSearchCV(rf_pipe_base, rf_params, n_iter=5, cv=cv_strategy, scoring='f1', n_jobs=-1, random_state=42)
+    rf_search = RandomizedSearchCV(rf_pipe_base, rf_params, n_iter=5, cv=5, scoring='f1', n_jobs=-1, random_state=42)
     rf_search.fit(X_train, y_train)
     rf_pipeline = rf_search.best_estimator_
     print(f"Parameter terbaik Random Forest: {rf_search.best_params_}")
