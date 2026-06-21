@@ -40,10 +40,10 @@ st.markdown("""
         color: #0f172a !important; font-weight: 800 !important; letter-spacing: -0.5px;
     }
     
-    div[data-baseweb="select"] > div, input {
+    input {
         background-color: #ffffff !important; color: #0f172a !important;
         border: 2px solid #cbd5e1 !important; border-radius: 10px !important;
-        height: 46px !important; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        padding: 10px !important; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
     }
     div[data-baseweb="select"] span { font-weight: 600 !important; }
     
@@ -416,19 +416,27 @@ else:
     with tab2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
         st.markdown('<div class="card-title">Sumber Data Analisis</div>', unsafe_allow_html=True)
-        use_upload = st.checkbox("📁 Unggah file dataset baru (.csv)", value=False)
+        source_tab1, source_tab2 = st.tabs(["📊 Dataset Bawaan", "📁 Unggah File Baru"])
         test_df = None
-        if use_upload:
+        
+        with source_tab1:
+            if os.path.exists("WA_Fn-UseC_-Telco-Customer-Churn.csv"):
+                st.info("ℹ️ Menggunakan dataset bawaan sistem.")
+                df_builtin = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
+                size_1 = st.slider("Jumlah baris yang dianalisis:", 5, len(df_builtin), min(len(df_builtin), 200), step=5, key="size_builtin")
+                if st.button("Mulai Prediksi Massal", key="btn_builtin"):
+                    test_df = df_builtin.head(size_1).copy()
+                    
+        with source_tab2:
             uploaded_file = st.file_uploader("Unggah file CSV Anda", type=["csv"], key="uploader_csv")
-            if uploaded_file is not None: test_df = pd.read_csv(uploaded_file)
-        elif os.path.exists("WA_Fn-UseC_-Telco-Customer-Churn.csv"):
-            test_df = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
-            st.info("ℹ️ Menggunakan dataset bawaan.")
-            
+            if uploaded_file is not None:
+                df_upload = pd.read_csv(uploaded_file)
+                size_2 = st.slider("Jumlah baris yang dianalisis:", 5, len(df_upload), min(len(df_upload), 200), step=5, key="size_upload")
+                if st.button("Mulai Prediksi Massal", key="btn_upload"):
+                    test_df = df_upload.head(size_2).copy()
+                    
         if test_df is not None:
-            sample_size = st.slider("Jumlah baris yang dianalisis:", 5, len(test_df), min(len(test_df), 200), step=5)
-            if st.button("Mulai Prediksi Massal", key="btn_batch"):
-                sampled_df = test_df.head(sample_size).copy()
+            sampled_df = test_df
                 req_cols = ['Contract', 'InternetService', 'TotalCharges', 'tenure', 'PaperlessBilling', 'MultipleLines', 'StreamingMovies']
                 if not all(c in sampled_df.columns for c in req_cols):
                     st.error("Dataset tidak memiliki kolom wajib.")
