@@ -251,9 +251,17 @@ def load_all_data():
 data = load_all_data()
 
 st.markdown("""
-<div class="header-container">
-    <h1>Telco Churn Enterprise Portal 📊</h1>
-    <p>Predict customer churn risk levels instantly, extract insights, and evaluate AI performance.</p>
+<div class="header-container" style="display: flex; align-items: center; justify-content: center; gap: 25px; flex-wrap: wrap;">
+    <div style="background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%); padding: 18px; border-radius: 18px; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h4l2-9 5 18 3-10h4"/>
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.3"/>
+        </svg>
+    </div>
+    <div style="text-align: left;">
+        <h1 style="margin-top: 0; margin-bottom: 8px; font-size: 2.8rem !important;">Telco Churn Enterprise Portal</h1>
+        <p style="margin: 0; max-width: 650px; font-size: 1.15rem !important;">Predict customer churn risk levels instantly, extract insights, and evaluate AI performance.</p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
