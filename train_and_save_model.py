@@ -10,10 +10,13 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
 import joblib
 
-def get_learning_curve_data(estimator, X, y, cv=5):
+from sklearn.model_selection import train_test_split, learning_curve, StratifiedKFold
+
+def get_learning_curve_data(estimator, X, y):
+    cv_strategy = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     # Calculates learning curve data points based on F1 Score
     train_sizes, train_scores, test_scores = learning_curve(
-        estimator, X, y, cv=cv, n_jobs=-1, 
+        estimator, X, y, cv=cv_strategy, n_jobs=-1, 
         train_sizes=np.linspace(0.1, 1.0, 5),
         scoring='f1'
     )
