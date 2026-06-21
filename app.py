@@ -437,73 +437,73 @@ else:
                     
         if test_df is not None:
             sampled_df = test_df
-                req_cols = ['Contract', 'InternetService', 'TotalCharges', 'tenure', 'PaperlessBilling', 'MultipleLines', 'StreamingMovies']
-                if not all(c in sampled_df.columns for c in req_cols):
-                    st.error("Dataset tidak memiliki kolom wajib.")
-                else:
-                    with st.spinner("Memproses..."):
-                        prep_df = sampled_df[req_cols].copy()
-                        prep_df['TotalCharges'] = pd.to_numeric(prep_df['TotalCharges'], errors='coerce').fillna(train_median)
+            req_cols = ['Contract', 'InternetService', 'TotalCharges', 'tenure', 'PaperlessBilling', 'MultipleLines', 'StreamingMovies']
+            if not all(c in sampled_df.columns for c in req_cols):
+                st.error("Dataset tidak memiliki kolom wajib.")
+            else:
+                with st.spinner("Memproses..."):
+                    prep_df = sampled_df[req_cols].copy()
+                    prep_df['TotalCharges'] = pd.to_numeric(prep_df['TotalCharges'], errors='coerce').fillna(train_median)
+                    
+                    preds, probs = model.predict(prep_df), model.predict_proba(prep_df)[:, 1]
+                    preds_rf, probs_rf = rf_model.predict(prep_df), rf_model.predict_proba(prep_df)[:, 1]
+                    
+                    sampled_df['Prediksi_XGBoost'] = ['Yes' if p == 1 else 'No' for p in preds]
+                    sampled_df['Probabilitas_XGBoost (%)'] = np.round(probs * 100, 2)
+                    sampled_df['Prediksi_RandomForest'] = ['Yes' if p == 1 else 'No' for p in preds_rf]
+                    sampled_df['Probabilitas_RF (%)'] = np.round(probs_rf * 100, 2)
+                    
+                if 'Churn' in sampled_df.columns:
+                    y_actual = sampled_df['Churn'].map({'Yes': 1, 'No': 0})
+                    from sklearn.metrics import classification_report
+                    
+                    def render_html_report(y_true, y_pred, title):
+                        rep = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
+                        html = f'''
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                            <h4 style="color: #0f172a; margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">{title}</h4>
+                            <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 0.9rem;">
+                                <tr style="color: #64748b; border-bottom: 1px solid #e2e8f0;">
+                                    <th style="text-align: left; padding: 8px;">Class</th><th style="padding: 8px;">Precision</th><th style="padding: 8px;">Recall</th><th style="padding: 8px;">F1-Score</th><th style="padding: 8px;">Support</th>
+                                </tr>
+                        '''
+                        def get_row(k, name, bold=False):
+                            if k not in rep: return ""
+                            p, r, f, s = rep[k].get('precision',''), rep[k].get('recall',''), rep[k].get('f1-score',''), rep[k].get('support','')
+                            if isinstance(p, float): p, r, f, s = f"{p:.2f}", f"{r:.2f}", f"{f:.2f}", str(int(s))
+                            w = "800" if bold else "500"
+                            c = "#0f172a" if bold else "#334155"
+                            bg = "#f8fafc" if bold else "transparent"
+                            return f'<tr style="background: {bg}; border-bottom: 1px solid #f1f5f9; color: {c}; font-weight: {w};"><td style="text-align: left; padding: 8px;">{name}</td><td style="padding: 8px;">{p}</td><td style="padding: 8px;">{r}</td><td style="padding: 8px;">{f}</td><td style="padding: 8px;">{s}</td></tr>'
                         
-                        preds, probs = model.predict(prep_df), model.predict_proba(prep_df)[:, 1]
-                        preds_rf, probs_rf = rf_model.predict(prep_df), rf_model.predict_proba(prep_df)[:, 1]
-                        
-                        sampled_df['Prediksi_XGBoost'] = ['Yes' if p == 1 else 'No' for p in preds]
-                        sampled_df['Probabilitas_XGBoost (%)'] = np.round(probs * 100, 2)
-                        sampled_df['Prediksi_RandomForest'] = ['Yes' if p == 1 else 'No' for p in preds_rf]
-                        sampled_df['Probabilitas_RF (%)'] = np.round(probs_rf * 100, 2)
-                        
-                    if 'Churn' in sampled_df.columns:
-                        y_actual = sampled_df['Churn'].map({'Yes': 1, 'No': 0})
-                        from sklearn.metrics import classification_report
-                        
-                        def render_html_report(y_true, y_pred, title):
-                            rep = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
-                            html = f'''
-                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                                <h4 style="color: #0f172a; margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">{title}</h4>
-                                <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 0.9rem;">
-                                    <tr style="color: #64748b; border-bottom: 1px solid #e2e8f0;">
-                                        <th style="text-align: left; padding: 8px;">Class</th><th style="padding: 8px;">Precision</th><th style="padding: 8px;">Recall</th><th style="padding: 8px;">F1-Score</th><th style="padding: 8px;">Support</th>
-                                    </tr>
-                            '''
-                            def get_row(k, name, bold=False):
-                                if k not in rep: return ""
-                                p, r, f, s = rep[k].get('precision',''), rep[k].get('recall',''), rep[k].get('f1-score',''), rep[k].get('support','')
-                                if isinstance(p, float): p, r, f, s = f"{p:.2f}", f"{r:.2f}", f"{f:.2f}", str(int(s))
-                                w = "800" if bold else "500"
-                                c = "#0f172a" if bold else "#334155"
-                                bg = "#f8fafc" if bold else "transparent"
-                                return f'<tr style="background: {bg}; border-bottom: 1px solid #f1f5f9; color: {c}; font-weight: {w};"><td style="text-align: left; padding: 8px;">{name}</td><td style="padding: 8px;">{p}</td><td style="padding: 8px;">{r}</td><td style="padding: 8px;">{f}</td><td style="padding: 8px;">{s}</td></tr>'
-                            
-                            html += get_row('0', 'No Churn (0)')
-                            html += get_row('1', 'Churn (1)')
-                            if 'accuracy' in rep:
-                                sup = rep['macro avg']['support'] if 'macro avg' in rep else 0
-                                html += f'<tr style="border-top: 2px solid #e2e8f0; font-weight: 800; background: #f8fafc; color: #0f172a;"><td style="text-align: left; padding: 8px;">Accuracy</td><td></td><td></td><td style="padding: 8px;">{rep["accuracy"]:.2f}</td><td style="padding: 8px;">{int(sup)}</td></tr>'
+                        html += get_row('0', 'No Churn (0)')
+                        html += get_row('1', 'Churn (1)')
+                        if 'accuracy' in rep:
+                            sup = rep['macro avg']['support'] if 'macro avg' in rep else 0
+                            html += f'<tr style="border-top: 2px solid #e2e8f0; font-weight: 800; background: #f8fafc; color: #0f172a;"><td style="text-align: left; padding: 8px;">Accuracy</td><td></td><td></td><td style="padding: 8px;">{rep["accuracy"]:.2f}</td><td style="padding: 8px;">{int(sup)}</td></tr>'
 
-                            html += get_row('macro avg', 'macro avg', True)
-                            html += get_row('weighted avg', 'weighted avg', True)
-                            html += '</table></div>'
-                            return html
-                            
-                        st.markdown("<h3 style='margin-top:20px; font-weight:800;'>📊 Metrik Evaluasi Model (Terhadap Data Uji Ini)</h3>", unsafe_allow_html=True)
-                        col_met1, col_met2 = st.columns(2)
-                        with col_met1:
-                            st.markdown(render_html_report(y_actual, preds, "🚀 XGBoost Classifier"), unsafe_allow_html=True)
-                        with col_met2:
-                            st.markdown(render_html_report(y_actual, preds_rf, "🌲 Random Forest Classifier"), unsafe_allow_html=True)
-                            
-                    st.dataframe(sampled_df, use_container_width=True)
-                    
-                    st.markdown("<hr style='margin: 40px 0;'>", unsafe_allow_html=True)
-                    st.markdown("## Analitik Hasil Uji & Performa ML")
-                    
-                    st.info("💡 **Konteks Analitik:** Grafik di bawah ini (EDA) secara dinamis dibuat **Berdasarkan Hasil Prediksi XGBoost** pada dataset yang baru saja Anda uji.")
-                    # Munculkan EDA berdasarkan data yang sedang diuji
-                    sampled_df['TotalCharges'] = pd.to_numeric(sampled_df['TotalCharges'], errors='coerce')
-                    show_eda_dashboard(sampled_df, "Prediksi_XGBoost")
-                    
-                    show_model_comparison(metrics, learning_curves)
+                        html += get_row('macro avg', 'macro avg', True)
+                        html += get_row('weighted avg', 'weighted avg', True)
+                        html += '</table></div>'
+                        return html
+                        
+                    st.markdown("<h3 style='margin-top:20px; font-weight:800;'>📊 Metrik Evaluasi Model (Terhadap Data Uji Ini)</h3>", unsafe_allow_html=True)
+                    col_met1, col_met2 = st.columns(2)
+                    with col_met1:
+                        st.markdown(render_html_report(y_actual, preds, "🚀 XGBoost Classifier"), unsafe_allow_html=True)
+                    with col_met2:
+                        st.markdown(render_html_report(y_actual, preds_rf, "🌲 Random Forest Classifier"), unsafe_allow_html=True)
+                        
+                st.dataframe(sampled_df, use_container_width=True)
+                
+                st.markdown("<hr style='margin: 40px 0;'>", unsafe_allow_html=True)
+                st.markdown("## Analitik Hasil Uji & Performa ML")
+                
+                st.info("💡 **Konteks Analitik:** Grafik di bawah ini (EDA) secara dinamis dibuat **Berdasarkan Hasil Prediksi XGBoost** pada dataset yang baru saja Anda uji.")
+                # Munculkan EDA berdasarkan data yang sedang diuji
+                sampled_df['TotalCharges'] = pd.to_numeric(sampled_df['TotalCharges'], errors='coerce')
+                show_eda_dashboard(sampled_df, "Prediksi_XGBoost")
+                
+                show_model_comparison(metrics, learning_curves)
 
         st.markdown('</div>', unsafe_allow_html=True)
