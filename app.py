@@ -235,8 +235,11 @@ def show_model_comparison(metrics, learning_curves):
 @st.cache_resource
 def load_all_data():
     try:
-        return joblib.load('churn_model.joblib')
-    except Exception:
+        import os
+        model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'churn_model.joblib')
+        return joblib.load(model_path)
+    except Exception as e:
+        st.warning(f"Debug error: {e}")
         return None
 
 data = load_all_data()
