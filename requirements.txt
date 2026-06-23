@@ -7,3 +7,4 @@ matplotlib
 altair
 seaborn
 xgboost
+imbalanced-learn
